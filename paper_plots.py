@@ -10,7 +10,6 @@ Created on Tue Oct  6 10:15:59 2020
 import numpy as np
 import matplotlib.pyplot as plt
 import cmath as cm
-from pdf import *
 
 #%% Choix du graphe plotté
 
@@ -193,6 +192,19 @@ def variance(cov, theta):
 def variance_dB(cov, theta):
     
     return  10 * np.log10(variance(cov, theta))
+
+#%% Generation of the Wigner function from the covariance matrix
+
+def pdf(cov, resolution):
+    
+    wigner = np.zeros((resolution, resolution))
+    
+    for i in range(resolution):
+        for j in range(resolution):
+            xy = np.array([10 * 2/resolution * (i - resolution/2),10 * 2/resolution * (j - resolution/2)])
+            wigner[i,j] = np.exp(-0.5 * np.transpose(xy).dot(cov).dot(xy))
+    
+    return wigner
 
 #%% Wigner functions at various frequencies (Schnabel)
 
