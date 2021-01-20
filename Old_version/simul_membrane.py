@@ -172,7 +172,7 @@ def cov_ref_ifo(omega, detuning, input_transmission, phase_mm):
     return apply(IFO(omega), cov_ref_lossy(omega, detuning, input_transmission, phase_mm))
 
 def cov_ref_ro(omega, detuning, input_transmission, phase_mm):
-    '''covariance matrix after the interferometer degraded by the reandout losses'''
+    '''covariance matrix after the interferometer degraded by the readout losses'''
     
     return readout_losses * vacuum_cov + (1 - readout_losses) * cov_ref_ifo(omega, detuning, input_transmission, phase_mm)
 
