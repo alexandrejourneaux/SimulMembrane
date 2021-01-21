@@ -8,6 +8,7 @@ Created on Tue Jan 19 17:23:51 2021
 import numpy as np
 import cmath as cm
 from simulation_library.constants import *
+from simulation_library.useful_functions import *
 
 class CovarianceMatrix:
     
@@ -19,6 +20,19 @@ class CovarianceMatrix:
     
     def passes_through(self, optical_element):
         self.covariance_matrix = optical_element.transfer_function(self.covariance_matrix)
+    
+    def variance(self, quadrature_angle = 0, dB = False):
+        cov_rot = apply(rotation(-quadrature_angle), self.covariance_matrix)
+        var = np.real(cov_rot[0, 0])
+        if dB:
+            return  10 * np.log10(var)
+        else:
+            return var
+        
+    def Sxx(self, theta, omega, lambda_carrier, finesse, intensity_input, omega_ifo):
+        '''gives the measurement noise in m^2/Hz, taking into account the low-pass filter effect of the ifo'''
+    
+        return lambda_carrier / (256 * finesse**2 * intensity_input) * self.variance(theta) * (1 + (omega/omega_ifo)**2) 
     
     
 
@@ -32,7 +46,7 @@ class LinearOpticalElement(OpticalElement):
     
     def __init__(self, two_photon_matrix):
         
-        transfer = lambda M: two_photon_matrix.dot(M).dot(np.transpose(np.conjugate(two_photon_matrix)))
+        transfer = lambda M: apply(two_photon_matrix, M)
         OpticalElement.__init__(self, transfer)
         
         self.two_photon_matrix = two_photon_matrix
@@ -44,9 +58,8 @@ class Squeezer(LinearOpticalElement):
     def __init__(self, squeezing_dB, theta = 0):
         r = - 0.5 * np.log(10**(-squeezing_dB/10))
         amplitude_squeezed = np.matrix( [[np.exp(-r), 0], [0, np.exp(r)]] )
-        rotation = np.matrix([[np.cos(theta), np.sin(theta)], [- np.sin(theta), np.cos(theta)]])
         
-        LinearOpticalElement.__init__(self, rotation.dot(amplitude_squeezed).dot(np.transpose(np.conjugate(rotation))))
+        LinearOpticalElement.__init__(self, apply(rotation(-theta), amplitude_squeezed))
     
         
     
@@ -79,10 +92,9 @@ class FilterCavity(LinearOpticalElement):
             
             return( 1 - (2 - epsilon) / (1 + i * ksi) )
         
-        A2 = (1 / np.sqrt(2)) * np.matrix([[1, 1], [-i, i]])
         one_photon_matrix = np.matrix([[reflection_coefficient(omega, detuning, input_transmission, losses), 0], [0, np.conjugate(reflection_coefficient(-omega, detuning, input_transmission, losses))]])
         
-        two_photon_matrix = A2.dot(one_photon_matrix).dot(np.transpose(np.conjugate(A2)))
+        two_photon_matrix = apply(A2, one_photon_matrix)
         
         LinearOpticalElement.__init__(self, two_photon_matrix)
     
@@ -105,7 +117,7 @@ class ModeMismatchedFilterCavity(OpticalElement):
         t00 = a0 * np.conjugate(b0)
         tmm = c0 - t00
             
-        MM = abs(tmm) * np.matrix([[np.cos(cm.phase(tmm)), - np.sin(cm.phase(tmm))], [np.sin(cm.phase(tmm)), np.cos(cm.phase(tmm))]])
+        MM = abs(tmm) * rotation(cm.phase(tmm))
         
         def reflection(omega, detuning, input_transmission):
             '''gives the transfer function in field amplitude of the cavity'''
@@ -117,7 +129,7 @@ class ModeMismatchedFilterCavity(OpticalElement):
         
         def transfer(cov_mat):
         
-            cav = (t00 * FilterCavity(omega, detuning, length, input_transmission, losses).two_photon_matrix + MM).dot(cov_mat).dot(np.transpose(np.conjugate(t00 * FilterCavity(omega, detuning, length, input_transmission, losses).two_photon_matrix + MM)))
+            cav = apply(t00 * FilterCavity(omega, detuning, length, input_transmission, losses).two_photon_matrix + MM, cov_mat)
             cav_losses = 1 - (abs(t00 * FilterCavity(omega, detuning, length, input_transmission, losses).reflection_coefficient() + tmm)**2 + abs(t00 * FilterCavity(-omega, detuning, length, input_transmission, losses).reflection_coefficient() + tmm)**2) / 2
             cav_vac = cav_losses * CovarianceMatrix().covariance_matrix
             

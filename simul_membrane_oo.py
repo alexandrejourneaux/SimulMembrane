@@ -34,9 +34,9 @@ omega_cav = gamma / tau
 
 # Paper parameters, to be measured for our experiment
 filter_cavity_losses = 0
-injection_losses = 0 # à modifier -> pertes avant la fc
-propagation_losses = 0 # à modifier -> pertes après la fc, avant l'ifo
-readout_losses = 0 # à modifier -> pertes après l'ifo
+injection_losses = 0        # à modifier -> pertes avant la fc
+propagation_losses = 0      # à modifier -> pertes après la fc, avant l'ifo
+readout_losses = 0          # à modifier -> pertes après l'ifo
 mode_mismatch_squeezer_filter_cavity = 0.0
 mode_mismatch_squeezer_local_oscillator = 0.0
 
@@ -54,7 +54,7 @@ sqz = sm.Squeezer(10)
 ifo = sm.Interferometer(omega, omega_m, m_eff, gamma, L_ifo, lambda_carrier, t_in, intensity_input, Q)
 fc = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
 
-state = sm.CovarianceMatrix()
-state.passes_through(sqz)
-state.passes_through(ifo)
-state.passes_through(fc)
+cov = sm.CovarianceMatrix()
+cov.passes_through(sqz)
+cov.passes_through(ifo)
+cov.passes_through(fc)
