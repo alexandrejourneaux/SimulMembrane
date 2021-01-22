@@ -13,7 +13,7 @@ import cmath as cm
 
 #%% Choix du graphe plotté
 
-graphe = 1
+graphe = 3
 phases_multiples = False
 
 #%% Constants

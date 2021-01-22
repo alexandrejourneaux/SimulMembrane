@@ -8,6 +8,7 @@ Created on Wed Jan 20 10:32:02 2021
 import numpy as np
 from simulation_library.constants import *
 from simulation_library import simulation as sm
+# from simulation_library import gui
 
 #%% Parameters definition
 
@@ -48,13 +49,44 @@ phase_mm_default = np.pi  # worst-case scenario ?
 
 omega = 0 #omega stands for the detuning to the carrier
 
-#%% Simulation
+#%% Simulation at one frequency
 
 sqz = sm.Squeezer(10)
+injection = sm.Losses(0.36)
 ifo = sm.Interferometer(omega, omega_m, m_eff, gamma, L_ifo, lambda_carrier, t_in, intensity_input, Q)
 fc = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
 
-cov = sm.CovarianceMatrix()
-cov.passes_through(sqz)
-cov.passes_through(ifo)
-cov.passes_through(fc)
+my_setup = sm.Setup([sqz, injection, ifo, fc])
+
+state = sm.State()
+
+state.passesThroughSetup(my_setup)
+
+#%% Plot
+
+# phases_multiples = False
+# sliders = False
+# dB = False
+# logscale = True
+
+# freq_span = 1e6 #Hz
+# nb_freq = 1000 # <- freq resolution
+
+# freq_min = omega_m / (2 * np.pi) - freq_span
+# freq_max = omega_m / (2 * np.pi) + freq_span
+
+# gui.noise_spectrum(freq_min, freq_max, nb_freq, covariance_matrix, detuning, input_transmission, phase_mm_default, dB = False, logscale = True, sliders = True, multiple_phases = False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
