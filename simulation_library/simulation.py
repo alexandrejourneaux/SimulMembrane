@@ -29,7 +29,7 @@ class State:
         for elt in setup.elements:            
             self.passesThrough(elt)
     
-    def variance(self, quadrature_angle = 0, dB = False):
+    def variance(self, quadrature_angle = 0, dB = True):
         cov_rot = apply(rotation(-quadrature_angle), self.covariance_matrix)
         var = np.real(cov_rot[0, 0])
         if dB:
@@ -40,7 +40,7 @@ class State:
     def Sxx(self, theta, omega, lambda_carrier, finesse, intensity_input, omega_ifo):
         '''gives the measurement noise in m^2/Hz, taking into account the low-pass filter effect of the ifo'''
     
-        return lambda_carrier / (256 * finesse**2 * intensity_input) * self.variance(theta) * (1 + (omega/omega_ifo)**2) 
+        return lambda_carrier / (256 * finesse**2 * intensity_input) * self.variance(theta, False) * (1 + (omega/omega_ifo)**2) 
     
         
 
@@ -48,8 +48,7 @@ class OpticalElement:
     '''Class from which every optical element inherits'''
     
     def __init__(self, transfer_function):
-        '''Optical elements are characterized by their input-output effect on the covariance matrix of the quantum noise
-           The transfer function is an omega-dependant function'''
+        '''Optical elements are characterized by their input-output effect on the covariance matrix of the quantum noise'''
         
         self.transfer_function = transfer_function
         
@@ -82,11 +81,6 @@ class Setup:
         
         return temp_state
     
-    def plotNoiseSpectrum(self, input_state, omega_min, omega_max, nb_freq):
-        
-        omega_array = np.linspace(omega_min, omega_max, nb_freq)
-        
-        #gui.noise_spectrum(self, omega_array, input_state, detuning, input_transmission, phase_mm_default, dB = False, logscale = True, sliders = True, multiple_phases = False):
 
 class Losses(OpticalElement):
     '''Injection of vacuum noise through a loss channel'''
@@ -180,22 +174,20 @@ class ModeMismatchedFilterCavity(OpticalElement):
             cav = apply(t00 * FilterCavity(omega, detuning, length, input_transmission, losses).two_photon_matrix + MM, cov_mat)
             cav_losses = 1 - (abs(t00 * FilterCavity(omega, detuning, length, input_transmission, losses).reflectionCoefficient() + tmm)**2 + abs(t00 * FilterCavity(-omega, detuning, length, input_transmission, losses).reflectionCoefficient() + tmm)**2) / 2
             cav_vac = cav_losses * State().covariance_matrix
-            
+                        
             return cav + cav_vac
         
         OpticalElement.__init__(self, transfer)
         
         
 
-
-
-
-
-
-
-
-
-
+# class FreqDependantSetup:
+#     '''A frequency-dependant setup is an array of Setups, which are all the same physical setup, 
+#        but each corresponding to a given sideband frequency'''
+    
+#     def __init__(self, setup, omega_array):
+#         '''The freq-dependant setup is defined by '''
+        
 
 
 
