@@ -1,150 +1,272 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jan 21 10:55:11 2021
+Created on Mon Jan 25 12:00:09 2021
 
 @author: Alexandre
 """
 
+import simulation_library.simulation as sm
+from simulation_library.constants import c
 import numpy as np
-from simulation_library.constants import *
-import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider, Button, RadioButtons, TextBox, CheckButtons
+from PyQt5 import QtWidgets, uic
 
 
-def noise_spectrum(setup, omega_array, detuning, input_transmission, phase_mm_default, input_state = sm.State(), dB = False, logscale = True, sliders = False, multiple_phases = False):
-    
-    nb_freq = len(omega_array)
-    freq_min = omega_array[0]
-    freq_max = omega_array[-1]
-    
-    angle_init = 90 # °
-    angle_step = 1
-    detuning_init = detuning * 1e-6 #s-1
-    detuning_step = 1e-2
-    detuning_min = 1.1
-    detuning_max = 1.7
-    transmission_init = input_transmission
-    transmission_min = 0
-    transmission_max = 0.1
-    transmission_step = 0.001
-    
-    fig, ax = plt.subplots()
-    plt.subplots_adjust(left=0.25, bottom=0.35)
-#    ax.set_ylim(-1, 10)
+class MainWindow(QtWidgets.QMainWindow):
 
-    if (not dB) and logscale:
-        plt.yscale('log')
+    def __init__(self, *args, **kwargs):
+
+        super(MainWindow, self).__init__(*args, **kwargs)
+
+        #Load the UI Page
+        uic.loadUi('simulation_library/maingui.ui', self)
     
-    if multiple_phases:
-        phase_mm = 2 * np.pi * np.arange(0, 8) / 8
-    else:
-        phase_mm = [phase_mm_default]
-    l = list()
-    v = list()
+        #Plot parameters
+        self.freq_center = 1e6 * float(self.centerFreqBox.text())
+        self.centerFreqButton.clicked.connect(self.setCenterFreq)
         
-    for k in range(len(phase_mm)):
-        var_plot = np.zeros(nb_freq)
-        var_plot_vac = np.zeros(nb_freq)
-        for j in range(nb_freq): # j indexes frequencies
-            if dB:
-                var_plot[j] = covariance_matrix.variance(0, dB)
+        self.freq_span = 1e6 * float(self.spanFreqBox.text())
+        self.spanFreqButton.clicked.connect(self.setSpanFreq)
+        
+        #Laser parameters
+        self.input_intensity = float(self.inputIntensityBox.text())
+        self.inputIntensityButton.clicked.connect(self.setInputIntensity)
+        
+        self.wavelength = 1e-9 * float(self.wavelengthBox.text())
+        self.wavelengthButton.clicked.connect(self.setWavelength)
+        
+        #Squeezer parameters
+        self.squeezing_factor = float(self.squeezingFactorBox.text())
+        self.squeezingFactorButton.clicked.connect(self.setSqueezingFactor)
+        
+        self.squeezing_angle = np.pi / 180 * float(self.squeezingAngleBox.text())
+        self.squeezingAngleButton.clicked.connect(self.setSqueezingAngle)
+        
+        self.injection_losses = np.pi / 180 * float(self.injectionLossesBox.text())
+        self.injectionLossesButton.clicked.connect(self.setInjectionLosses)
+        
+        #Filter cavity parameters
+        self.detuning = 2 * np.pi * 1e6 * float(self.detuningBox.text())
+        self.detuningButton.clicked.connect(self.setDetuning)
+        
+        self.input_transmission = float(self.inputTransmissionBox.text())
+        self.inputTransmissionButton.clicked.connect(self.setInputTransmission)
+        
+        self.filter_cavity_losses = float(self.filterCavityLossesBox.text())
+        self.filterCavityLossesButton.clicked.connect(self.setFilterCavityLosses)
+        
+        self.filter_cavity_length = 1e-2 * float(self.filterCavityLengthBox.text())
+        self.filterCavityLengthButton.clicked.connect(self.setFilterCavityLength)
+        
+        #Interferometer parameters
+        self.ifo_length = 1e-6 * float(self.ifoLengthBox.text())
+        self.ifoLengthButton.clicked.connect(self.setIfoLength)
+
+        self.ifo_finesse = float(self.ifoFinesseBox.text())
+        self.ifoFinesseButton.clicked.connect(self.setIfoFinesse)
+        
+        self.m_eff = 1e-9 * float(self.ifoMassBox.text())
+        self.ifoMassButton.clicked.connect(self.setIfoMass)
+        
+        self.omega_m = 2 * np.pi * 1e6 * float(self.ifoOmegamBox.text())
+        self.ifoOmegamButton.clicked.connect(self.setIfoOmegam)
+        
+        self.quality_factor = float(self.ifoQualityFactorBox.text())
+        self.ifoQualityFactorButton.clicked.connect(self.setQualityFactor)
+        
+        self.propagation_losses = float(self.propagationLossesBox.text())
+        self.propagationLossesButton.clicked.connect(self.setPropagationLosses)
+        
+        #Read-out parameters
+        self.homodyne_angle = np.pi / 180 * float(self.homodyneAngleBox.text())
+        self.homodyneAngleButton.clicked.connect(self.setHomodyneAngle)
+        
+        self.readout_losses = float(self.readoutLossesBox.text())
+        self.readoutLossesButton.clicked.connect(self.setReadoutLosses)
+        
+        #Mode-mismatch parameters
+        self.mode_mismatch_squeezer_filter_cavity = float(self.mmSqueezerCavityBox.text())
+        self.mmSqueezerCavityButton.clicked.connect(self.setMmSqueezerCavity)
+        
+        self.mode_mismatch_squeezer_local_oscillator = float(self.mmSqueezerLOBox.text())
+        self.mmSqueezerLOButton.clicked.connect(self.setMmSqueezerLO)
                 
-                variance_dB(cov_ref_ro(omega[j], 2 * np.pi * detuning_init * 1e6, transmission_init, phase_mm[k]), (np.pi/180) * angle_init)
-                
-                var_plot_vac[j] = variance_dB(cov_ref_ro_vac(omega[j], 2 * np.pi * detuning_init * 1e6, transmission_init, phase_mm[k]), (np.pi/180) * angle_init)
-            else:
-                var_plot[j] = Sxx(cov_ref_ro(omega[j], 2 * np.pi * detuning_init * 1e6, transmission_init, phase_mm[k]), (np.pi/180) * angle_init, omega[j])
-                var_plot_vac[j] = Sxx(cov_ref_ro_vac(omega[j], 2 * np.pi * detuning_init * 1e6, transmission_init, phase_mm[k]), (np.pi/180) * angle_init, omega[j])
-        l.append(0)
-        v.append(0)
-        l[k] = ax.plot(omega/(2*np.pi), var_plot, '-') #, label='Mismatch phase = {}°'.format(phase_mm[k] * 180 / np.pi)
-#        plt.legend()
-        v[k] = ax.plot(omega/(2*np.pi), var_plot_vac, '--', color='black', linewidth=1)
+        self.plot()
         
-    if sliders:
-        
-        axcolor = 'lightgoldenrodyellow'
-        axangle = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
-        axdetuning = plt.axes([0.25, 0.15, 0.65, 0.03], facecolor=axcolor)
-        axtransmission = plt.axes([0.25, 0.2, 0.65, 0.03], facecolor=axcolor)
-        axfreqmin = plt.axes([0.25, 0.25, 0.1, 0.05], facecolor=axcolor)
-        axfreqmax = plt.axes([0.6, 0.25, 0.1, 0.05], facecolor=axcolor)
-        
-        sangle = Slider(axangle, 'Homodyne angle (°)', 0, 180, valinit=angle_init, valstep=angle_step)
-        sdetuning = Slider(axdetuning, 'Detuning (MHz)', detuning_min, detuning_max, valinit=detuning_init, valstep=detuning_step)
-        stransmission = Slider(axtransmission, 'Input mirror transmission', transmission_min, transmission_max, valinit=transmission_init, valstep=transmission_step)
-        sfreqmin = TextBox(axfreqmin, 'Min frequency (MHz)', initial=str(freq_min * 1e-6), color='.95', hovercolor='1')
-        sfreqmax = TextBox(axfreqmax, 'Max frequency (MHz)', initial=str(freq_max * 1e-6), color='.95', hovercolor='1')
-        
-        def update(val):
-            angle = np.pi * sangle.val /180
-            detuning = 2 * np.pi * sdetuning.val * 1e6
-            transmission = stransmission.val
-            omega_min = 2 * np.pi * float(sfreqmin.text) * 1e6 #s-1
-            omega_max = 2 * np.pi * float(sfreqmax.text) * 1e6 #s-1 <- range of sideband frequencies observed
-    #        nb_freq = 1000 # <- freq resolution
-            omega = np.linspace(omega_min, omega_max, nb_freq)
-            for k in range(len(phase_mm)):
-                var_plot = np.zeros(nb_freq)
-                var_plot_vac = np.zeros(nb_freq)
-                for j in range(nb_freq):
-                    if dB:
-                        var_plot[j] = variance_dB(cov_ref_ro(omega[j], detuning, transmission, phase_mm[k]), angle)
-                        var_plot_vac[j] = variance_dB(cov_ref_ro_vac(omega[j], detuning, transmission, phase_mm[k]), angle)
-                    else:
-                        var_plot[j] = Sxx(cov_ref_ro(omega[j], detuning, transmission, phase_mm[k]), angle, omega[j])
-                        var_plot_vac[j] = Sxx(cov_ref_ro_vac(omega[j], detuning, transmission, phase_mm[k]), angle, omega[j])
-                l[k][0].set_ydata(var_plot)    
-                v[k][0].set_ydata(var_plot_vac)
-            fig.canvas.draw()
-        
-        sangle.on_changed(update)
-        sdetuning.on_changed(update)
-        stransmission.on_changed(update)
-        sfreqmin.on_submit(update)
-        sfreqmax.on_submit(update)
     
-    else:
+    def setDetuning(self):
+        self.detuning = 2 * np.pi * float(self.detuningBox.text()) * 1e6
+        self.plot()
         
-        axcolor = 'lightgoldenrodyellow'
-        axangle = plt.axes([0.25, 0.1, 0.1, 0.05], facecolor=axcolor)
-        axdetuning = plt.axes([0.6, 0.175, 0.1, 0.05], facecolor=axcolor)
-        axtransmission = plt.axes([0.25, 0.175, 0.1, 0.05], facecolor=axcolor)
-        axfreqmin = plt.axes([0.25, 0.25, 0.1, 0.05], facecolor=axcolor)
-        axfreqmax = plt.axes([0.6, 0.25, 0.1, 0.05], facecolor=axcolor)
+    def setCenterFreq(self):
+        self.freq_center = 1e6 * float(self.centerFreqBox.text())
+        self.plot()
+        
+    def setSpanFreq(self):
+        self.freq_span = 1e6 * float(self.spanFreqBox.text())
+        self.plot()
+    
+    def setInputTransmission(self):
+        self.input_transmission = float(self.inputTransmissionBox.text())
+        self.plot()
+        
+    def setFilterCavityLosses(self):
+        self.filter_cavity_losses = float(self.filterCavityLossesBox.text())
+        self.plot()
+        
+    def setHomodyneAngle(self):
+        self.homodyne_angle = np.pi / 180 * float(self.homodyneAngleBox.text())
+        self.plot()
+        
+    def setInputIntensity(self):
+        self.input_intensity = float(self.inputIntensityBox.text())
+        self.plot()
+        
+    def setWavelength(self):
+        self.wavelength = 1e-9 * float(self.wavelengthBox.text())
+        self.plot()
+        
+    def setFilterCavityLength(self):
+        self.filter_cavity_length = 1e-2 * float(self.filterCavityLengthBox.text())
+        self.plot()
+    
+    def setIfoLength(self):
+        self.ifo_length = 1e-6 * float(self.ifoLengthBox.text())
+        self.plot()
+        
+    def setIfoFinesse(self):
+        self.ifo_finesse = float(self.ifoFinesseBox.text())
+        self.plot()
+    
+    def setIfoMass(self):
+        self.m_eff = 1e-9 * float(self.ifoMassBox.text())
+        self.plot()
+    
+    def setIfoOmegam(self):
+        self.omega_m = 2 * np.pi * 1e6 * float(self.ifoOmegamBox.text())
+        self.plot()
+    
+    def setQualityFactor(self):
+        self.quality_factor = float(self.ifoQualityFactorBox.text())
+        self.plot()
+        
+    def setSqueezingFactor(self):
+        self.squeezing_factor = float(self.squeezingFactorBox.text())
+        self.plot()
+    
+    def setSqueezingAngle(self):
+        self.squeezing_angle = np.pi / 180 * float(self.squeezingAngleBox.text())
+        self.plot()
+    
+    def setInjectionLosses(self):
+        self.injection_losses = float(self.injectionLossesBox.text())
+        self.plot()
+    
+    def setPropagationLosses(self):
+        self.propagation_losses = float(self.propagationLossesBox.text())
+        self.plot()
+    
+    def setReadoutLosses(self):
+        self.readout_losses = float(self.readoutLossesBox.text())
+        self.plot()
+    
+    def setMmSqueezerCavity(self):
+        self.mode_mismatch_squeezer_filter_cavity = float(self.mmSqueezerCavityBox.text())
+        self.plot()
+    
+    def setMmSqueezerLO(self):
+        self.mode_mismatch_squeezer_local_oscillator = float(self.mmSqueezerLOBox.text())
+        self.plot()
 
-        sangle = TextBox(axangle, 'Homodyne angle (°)', initial=str(angle_init), color='.95', hovercolor='1')
-        sdetuning = TextBox(axdetuning, 'Detuning (MHz)', initial=str(detuning_init), color='.95', hovercolor='1')
-        stransmission = TextBox(axtransmission, 'Input mirror transmission', initial=str(transmission_init), color='.95', hovercolor='1')
-        sfreqmin = TextBox(axfreqmin, 'Min frequency (MHz)', initial=str(freq_min * 1e-6), color='.95', hovercolor='1')
-        sfreqmax = TextBox(axfreqmax, 'Max frequency (MHz)', initial=str(freq_max * 1e-6), color='.95', hovercolor='1')
-        
-        def update(val):
-            angle = np.pi * float(sangle.text) /180
-            detuning = 2 * np.pi * float(sdetuning.text) * 1e6
-            transmission = float(stransmission.text)
-            omega_min = 2 * np.pi * float(sfreqmin.text) * 1e6 #s-1
-            omega_max = 2 * np.pi * float(sfreqmax.text) * 1e6 #s-1 <- range of sideband frequencies observed
-    #        nb_freq = 1000 # <- freq resolution
-            omega = np.linspace(omega_min, omega_max, nb_freq)
-            for k in range(len(phase_mm)):
-                var_plot = np.zeros(nb_freq)
-                var_plot_vac = np.zeros(nb_freq)
-                for j in range(nb_freq):
-                    if dB:
-                        var_plot[j] = variance_dB(cov_ref_ro(omega[j], detuning, transmission, phase_mm[k]), angle)
-                        var_plot_vac[j] = variance_dB(cov_ref_ro_vac(omega[j], detuning, transmission, phase_mm[k]), angle)
-                    else:
-                        var_plot[j] = Sxx(cov_ref_ro(omega[j], detuning, transmission, phase_mm[k]), angle, omega[j])
-                        var_plot_vac[j] = Sxx(cov_ref_ro_vac(omega[j], detuning, transmission, phase_mm[k]), angle, omega[j])
-                l[k][0].set_ydata(var_plot)
-                v[k][0].set_ydata(var_plot_vac)
-            fig.canvas.draw()
-        
-        sangle.on_submit(update)
-        sdetuning.on_submit(update)
-        stransmission.on_submit(update)
-        sfreqmin.on_submit(update)
-        sfreqmax.on_submit(update)    
     
-    plt.show()
+    def plot(self):
+        
+        #Laser
+        intensity_input = self.input_intensity # photons/s
+        lambda_carrier = self.wavelength # m
+        omega_carrier = 2 * np.pi * c / lambda_carrier
+        
+        # Filter cavity
+        L_fc = self.filter_cavity_length # m
+        t1 = self.input_transmission
+        detuning = self.detuning #rad/s
+        phase_mm_default = np.pi  # worst-case scenario for the phase experienced by the mode mismatched filed upon reflection on the filter cavity
+        
+        # Interferometer (membrane cavity)
+        L_ifo = self.ifo_length # m
+        finesse = self.ifo_finesse
+        t_in = np.sqrt(2 * np.pi / finesse)
+        m_eff = self.m_eff # kg
+        omega_m = self.omega_m # rad/s
+        Q = self.quality_factor
+        
+        gamma = t_in**2 / 2
+        tau = 2 * L_ifo / c
+        omega_cav = gamma / tau
+        
+        # Parameters to be measured for our experiment
+        filter_cavity_losses = self.filter_cavity_losses
+        injection_losses = self.injection_losses
+        propagation_losses = self.propagation_losses
+        readout_losses = self.readout_losses
+        mode_mismatch_squeezer_filter_cavity = self.mode_mismatch_squeezer_filter_cavity
+        mode_mismatch_squeezer_local_oscillator = self.mode_mismatch_squeezer_local_oscillator
+        
+        # Squeezer
+        squeezing_dB = self.squeezing_factor
+        squeezing_angle = self.squeezing_angle # dB, rad
+        
+        #Readout
+        homodyne_angle = self.homodyne_angle
+        
+        #Plot
+        freq_min = self.freq_center - self.freq_span
+        freq_max = self.freq_center + self.freq_span
+        
+
+        
+        def var(omega):
+            sqz = sm.Squeezer(squeezing_dB, squeezing_angle)
+            injection = sm.Losses(injection_losses)
+            fc = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
+            propagation = sm.Losses(propagation_losses)
+            ifo = sm.Interferometer(omega, omega_m, m_eff, gamma, L_ifo, lambda_carrier, t_in, intensity_input, Q)
+            readout = sm.Losses(readout_losses)
+            
+            my_setup = sm.Setup([sqz, injection, fc, propagation, ifo, readout])
+            
+            state = sm.State()
+            
+            state.passesThroughSetup(my_setup)
+            
+            return state.variance(homodyne_angle)
+        
+        def shot(omega):
+            injection = sm.Losses(injection_losses)
+            fc = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
+            propagation = sm.Losses(propagation_losses)
+            ifo = sm.Interferometer(omega, omega_m, m_eff, gamma, L_ifo, lambda_carrier, t_in, intensity_input, Q)
+            readout = sm.Losses(readout_losses)
+            
+            my_setup = sm.Setup([injection, fc, propagation, ifo, readout])
+            
+            state = sm.State()
+            
+            state.passesThroughSetup(my_setup)
+            
+            return state.variance(homodyne_angle)
+        
+        omega_min = 2 * np.pi * freq_min #s-1
+        omega_max = 2 * np.pi * freq_max #s-1 <- range of sideband frequencies observed
+        nb_freq = 1000 # <- freq resolution²
+        
+        omega_array = np.linspace(omega_min, omega_max, nb_freq)
+        
+        noise = [var(omega) for omega in omega_array]
+        vac_noise = [shot(omega) for omega in omega_array]
+        
+        self.graph.clear()
+        
+        self.graph.plot(omega_array / (2 * np.pi), noise)
+        self.graph.plot(omega_array / (2 * np.pi), vac_noise)
+
+
