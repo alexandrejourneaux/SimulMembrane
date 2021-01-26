@@ -8,7 +8,8 @@ Created on Mon Jan 25 12:00:09 2021
 import simulation_library.simulation as sm
 from simulation_library.constants import c
 import numpy as np
-from PyQt5 import QtWidgets, uic
+from PyQt5 import QtCore, QtWidgets, uic
+import pyqtgraph as pg
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -24,7 +25,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.freq_center = 1e6 * float(self.centerFreqBox.text())
         self.centerFreqButton.clicked.connect(self.setCenterFreq)
         
-        self.freq_span = 1e6 * float(self.spanFreqBox.text())
+        self.freq_span = float(self.spanFreqBox.text())
         self.spanFreqButton.clicked.connect(self.setSpanFreq)
         
         #Laser parameters
@@ -89,7 +90,24 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.mode_mismatch_squeezer_local_oscillator = float(self.mmSqueezerLOBox.text())
         self.mmSqueezerLOButton.clicked.connect(self.setMmSqueezerLO)
-                
+        
+        #Options
+        self.unitBox.setChecked(True)
+        self.m2Hz = self.unitBox.isChecked()
+        self.unitBox.clicked.connect(self.setUnit)
+        
+        self.graph.setBackground('w')
+        self.pen1 = pg.mkPen(color=(255, 0, 0))
+        self.pen2 = pg.mkPen(color=(0, 0, 0), style=QtCore.Qt.DashLine)
+        
+        self.setWindowTitle('SimulMembrane')
+        
+        self.label_style = {'color':'r', 'font-size':'15px'}
+        self.graph.setLabel('left', 'Position noise (m²/Hz)', **self.label_style)
+        self.graph.setLabel('bottom', 'Sideband frequency', 'Hz', **self.label_style)
+        self.graph.addLegend()
+        self.graph.setLogMode(False, True)
+        
         self.plot()
         
     
@@ -102,7 +120,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.plot()
         
     def setSpanFreq(self):
-        self.freq_span = 1e6 * float(self.spanFreqBox.text())
+        self.freq_span = float(self.spanFreqBox.text())
         self.plot()
     
     def setInputTransmission(self):
@@ -176,9 +194,13 @@ class MainWindow(QtWidgets.QMainWindow):
     def setMmSqueezerLO(self):
         self.mode_mismatch_squeezer_local_oscillator = float(self.mmSqueezerLOBox.text())
         self.plot()
+        
+    def setUnit(self):
+        self.m2Hz = self.unitBox.isChecked()
+        self.plot(rescale = True)
 
     
-    def plot(self):
+    def plot(self, rescale = False):
         
         #Laser
         intensity_input = self.input_intensity # photons/s
@@ -200,8 +222,6 @@ class MainWindow(QtWidgets.QMainWindow):
         Q = self.quality_factor
         
         gamma = t_in**2 / 2
-        tau = 2 * L_ifo / c
-        omega_cav = gamma / tau
         
         # Parameters to be measured for our experiment
         filter_cavity_losses = self.filter_cavity_losses
@@ -238,7 +258,11 @@ class MainWindow(QtWidgets.QMainWindow):
             
             state.passesThroughSetup(my_setup)
             
-            return state.variance(homodyne_angle)
+            if self.m2Hz:
+                return state.Sxx(homodyne_angle, omega, lambda_carrier, finesse, intensity_input, omega_m)
+            
+            else:
+                return state.variance(homodyne_angle)
         
         def shot(omega):
             injection = sm.Losses(injection_losses)
@@ -253,7 +277,15 @@ class MainWindow(QtWidgets.QMainWindow):
             
             state.passesThroughSetup(my_setup)
             
-            return state.variance(homodyne_angle)
+            if self.m2Hz:
+                self.graph.setLabel('left', 'Position noise (m²/Hz)', **self.label_style)
+                return state.Sxx(homodyne_angle, omega, lambda_carrier, finesse, intensity_input, omega_m)
+            
+            else:
+                self.graph.setLabel('left', 'Phase noise (dB)', **self.label_style)
+                return state.variance(homodyne_angle)
+        
+        self.graph.clear()
         
         omega_min = 2 * np.pi * freq_min #s-1
         omega_max = 2 * np.pi * freq_max #s-1 <- range of sideband frequencies observed
@@ -264,9 +296,10 @@ class MainWindow(QtWidgets.QMainWindow):
         noise = [var(omega) for omega in omega_array]
         vac_noise = [shot(omega) for omega in omega_array]
         
-        self.graph.clear()
+        if rescale:
+            self.graph.setYRange(min([*noise, *vac_noise]), max([*noise, *vac_noise]), padding=0)
         
-        self.graph.plot(omega_array / (2 * np.pi), noise)
-        self.graph.plot(omega_array / (2 * np.pi), vac_noise)
+        self.graph.plot(omega_array / (2 * np.pi), noise, name = 'With squeezer', pen = self.pen1)
+        self.graph.plot(omega_array / (2 * np.pi), vac_noise, name = 'Without squeezer', pen = self.pen2)
 
 

@@ -7,9 +7,8 @@ Created on Tue Jan 19 17:23:51 2021
 
 import numpy as np
 import cmath as cm
-from simulation_library.constants import *
-from simulation_library.useful_functions import *
-#from simulation_library import gui
+from simulation_library.constants import c, i, h_bar, A2
+from simulation_library.useful_functions import rotation, apply
 
 
 class State:

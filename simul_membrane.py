@@ -11,7 +11,7 @@ import sys
 
 #from simulation_library import simulation as sm
 
-#%% Plot, frequency-dependant
+#%% GUI launcher
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
@@ -26,12 +26,14 @@ if __name__=='__main__':
 
 # omega = 0
 
-# sqz = sm.Squeezer(10)
-# injection = sm.Losses(0.36)
-# ifo = sm.Interferometer(omega, omega_m, m_eff, gamma, L_ifo, lambda_carrier, t_in, intensity_input, Q)
+# sqz = sm.Squeezer(squeezing_dB, squeezing_angle)
+# injection = sm.Losses(injection_losses)
 # fc = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
+# propagation = sm.Losses(propagation_losses)
+# ifo = sm.Interferometer(omega, omega_m, m_eff, gamma, L_ifo, lambda_carrier, t_in, intensity_input, Q)
+# readout = sm.Losses(readout_losses)
 
-# my_setup = sm.Setup([sqz, injection, ifo, fc])
+# my_setup = sm.Setup([sqz, injection, fc, propagation, ifo, readout])
 
 # state = sm.State()
 

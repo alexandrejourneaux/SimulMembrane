@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1304</width>
-    <height>850</height>
+    <width>1178</width>
+    <height>797</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,10 +36,10 @@
     </item>
     <item row="1" column="1" colspan="2">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="26" column="1">
-       <widget class="QPushButton" name="readoutLossesButton">
+      <item row="17" column="1">
+       <widget class="QPushButton" name="ifoLengthButton">
         <property name="text">
-         <string>Read-out losses</string>
+         <string>Cavity length (µm)</string>
         </property>
        </widget>
       </item>
@@ -50,17 +50,17 @@
         </property>
        </widget>
       </item>
-      <item row="17" column="1">
-       <widget class="QPushButton" name="ifoLengthButton">
-        <property name="text">
-         <string>Cavity length (µm)</string>
-        </property>
-       </widget>
-      </item>
       <item row="29" column="0">
        <widget class="QLineEdit" name="mmSqueezerLOBox">
         <property name="text">
          <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="26" column="1">
+       <widget class="QPushButton" name="readoutLossesButton">
+        <property name="text">
+         <string>Read-out losses</string>
         </property>
        </widget>
       </item>
@@ -71,17 +71,17 @@
         </property>
        </widget>
       </item>
+      <item row="27" column="0" colspan="2">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Mode mismatch</string>
+        </property>
+       </widget>
+      </item>
       <item row="10" column="0">
        <widget class="QLineEdit" name="injectionLossesBox">
         <property name="text">
          <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item row="15" column="0">
-       <widget class="QLineEdit" name="filterCavityLengthBox">
-        <property name="text">
-         <string>85</string>
         </property>
        </widget>
       </item>
@@ -99,10 +99,17 @@
         </property>
        </widget>
       </item>
-      <item row="27" column="0" colspan="2">
-       <widget class="QLabel" name="label_7">
+      <item row="15" column="0">
+       <widget class="QLineEdit" name="filterCavityLengthBox">
         <property name="text">
-         <string>Mode mismatch</string>
+         <string>85</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0" colspan="2">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Squeezer</string>
         </property>
        </widget>
       </item>
@@ -113,10 +120,10 @@
         </property>
        </widget>
       </item>
-      <item row="7" column="0" colspan="2">
-       <widget class="QLabel" name="label_6">
+      <item row="14" column="0">
+       <widget class="QLineEdit" name="filterCavityLossesBox">
         <property name="text">
-         <string>Squeezer</string>
+         <string>0</string>
         </property>
        </widget>
       </item>
@@ -134,17 +141,10 @@
         </property>
        </widget>
       </item>
-      <item row="14" column="0">
-       <widget class="QLineEdit" name="filterCavityLossesBox">
+      <item row="19" column="1">
+       <widget class="QPushButton" name="ifoMassButton">
         <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item row="14" column="1">
-       <widget class="QPushButton" name="filterCavityLossesButton">
-        <property name="text">
-         <string>Cavity losses</string>
+         <string>Effective mass (µg)</string>
         </property>
        </widget>
       </item>
@@ -162,6 +162,13 @@
         </property>
        </widget>
       </item>
+      <item row="14" column="1">
+       <widget class="QPushButton" name="filterCavityLossesButton">
+        <property name="text">
+         <string>Cavity losses</string>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0">
        <widget class="QLineEdit" name="centerFreqBox">
         <property name="text">
@@ -169,10 +176,17 @@
         </property>
        </widget>
       </item>
-      <item row="19" column="1">
-       <widget class="QPushButton" name="ifoMassButton">
+      <item row="2" column="1">
+       <widget class="QPushButton" name="centerFreqButton">
         <property name="text">
-         <string>Effective mass (µg)</string>
+         <string>Center frequency (MHz)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <widget class="QLineEdit" name="inputTransmissionBox">
+        <property name="text">
+         <string>0.07</string>
         </property>
        </widget>
       </item>
@@ -180,13 +194,6 @@
        <widget class="QPushButton" name="inputTransmissionButton">
         <property name="text">
          <string>Input mirror transmission</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QPushButton" name="centerFreqButton">
-        <property name="text">
-         <string>Center frequency (MHz)</string>
         </property>
        </widget>
       </item>
@@ -211,20 +218,6 @@
         </property>
        </widget>
       </item>
-      <item row="13" column="0">
-       <widget class="QLineEdit" name="inputTransmissionBox">
-        <property name="text">
-         <string>0.07</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLineEdit" name="inputIntensityBox">
-        <property name="text">
-         <string>5e15</string>
-        </property>
-       </widget>
-      </item>
       <item row="22" column="0">
        <widget class="QLineEdit" name="ifoQualityFactorBox">
         <property name="text">
@@ -239,6 +232,20 @@
         </property>
        </widget>
       </item>
+      <item row="5" column="0">
+       <widget class="QLineEdit" name="inputIntensityBox">
+        <property name="text">
+         <string>5e15</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QPushButton" name="spanFreqButton">
+        <property name="text">
+         <string>Frequency span (MHz)</string>
+        </property>
+       </widget>
+      </item>
       <item row="4" column="0" colspan="2">
        <widget class="QLabel" name="label_3">
         <property name="text">
@@ -246,10 +253,10 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="spanFreqButton">
+      <item row="3" column="0">
+       <widget class="QLineEdit" name="spanFreqBox">
         <property name="text">
-         <string>Frequency span (Hz)</string>
+         <string>1.5</string>
         </property>
        </widget>
       </item>
@@ -260,17 +267,17 @@
         </property>
        </widget>
       </item>
+      <item row="5" column="1">
+       <widget class="QPushButton" name="inputIntensityButton">
+        <property name="text">
+         <string>Input intensity (photons/s)</string>
+        </property>
+       </widget>
+      </item>
       <item row="28" column="1">
        <widget class="QPushButton" name="mmSqueezerCavityButton">
         <property name="text">
          <string>Squeezer / Filter cavity</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLineEdit" name="spanFreqBox">
-        <property name="text">
-         <string>100</string>
         </property>
        </widget>
       </item>
@@ -281,17 +288,10 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
-       <widget class="QPushButton" name="inputIntensityButton">
+      <item row="12" column="1">
+       <widget class="QPushButton" name="detuningButton">
         <property name="text">
-         <string>Input intensity (photons/s)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLineEdit" name="squeezingFactorBox">
-        <property name="text">
-         <string>5</string>
+         <string>Detuning (MHz)</string>
         </property>
        </widget>
       </item>
@@ -299,13 +299,6 @@
        <widget class="QLabel" name="label_5">
         <property name="text">
          <string>Interferometer</string>
-        </property>
-       </widget>
-      </item>
-      <item row="12" column="1">
-       <widget class="QPushButton" name="detuningButton">
-        <property name="text">
-         <string>Detuning (MHz)</string>
         </property>
        </widget>
       </item>
@@ -323,10 +316,17 @@
         </property>
        </widget>
       </item>
-      <item row="21" column="1">
-       <widget class="QPushButton" name="ifoOmegamButton">
+      <item row="8" column="0">
+       <widget class="QLineEdit" name="squeezingFactorBox">
         <property name="text">
-         <string>Mech. resonance frequency (MHz)</string>
+         <string>5</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLineEdit" name="squeezingAngleBox">
+        <property name="text">
+         <string>90</string>
         </property>
        </widget>
       </item>
@@ -344,10 +344,10 @@
         </property>
        </widget>
       </item>
-      <item row="9" column="0">
-       <widget class="QLineEdit" name="squeezingAngleBox">
+      <item row="21" column="1">
+       <widget class="QPushButton" name="ifoOmegamButton">
         <property name="text">
-         <string>90</string>
+         <string>Mech. resonance frequency (MHz)</string>
         </property>
        </widget>
       </item>
@@ -358,10 +358,10 @@
         </property>
        </widget>
       </item>
-      <item row="23" column="1">
-       <widget class="QPushButton" name="propagationLossesButton">
+      <item row="8" column="1">
+       <widget class="QPushButton" name="squeezingFactorButton">
         <property name="text">
-         <string>Propagation losses</string>
+         <string>Squeezing factor (dB)</string>
         </property>
        </widget>
       </item>
@@ -372,24 +372,10 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="1">
-       <widget class="QPushButton" name="squeezingFactorButton">
+      <item row="23" column="1">
+       <widget class="QPushButton" name="propagationLossesButton">
         <property name="text">
-         <string>Squeezing factor (dB)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="31" column="0" colspan="2">
-       <widget class="QCheckBox" name="unitBox">
-        <property name="text">
-         <string>Units in m^2/Hz (if unchecked, prints dB under shot noise)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="30" column="0" colspan="2">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>Options</string>
+         <string>Propagation losses</string>
         </property>
        </widget>
       </item>
@@ -434,7 +420,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1304</width>
+     <width>1178</width>
      <height>21</height>
     </rect>
    </property>
