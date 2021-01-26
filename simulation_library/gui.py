@@ -201,6 +201,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     
     def plot(self, rescale = False):
+        '''Plots the noise spectrum of the output of the setup defined in var() and shot()'''
         
         #Laser
         intensity_input = self.input_intensity # photons/s
@@ -245,6 +246,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         
         def var(omega):
+            '''var(omega) returns the noise at freq omega with squeezed light'''
+            
             sqz = sm.Squeezer(squeezing_dB, squeezing_angle)
             injection = sm.Losses(injection_losses)
             fc = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
@@ -265,6 +268,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 return state.variance(homodyne_angle)
         
         def shot(omega):
+            '''shot(omega) returns the noise at freq omega with only vacuum fluctuation in the input port'''
+            
             injection = sm.Losses(injection_losses)
             fc = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
             propagation = sm.Losses(propagation_losses)

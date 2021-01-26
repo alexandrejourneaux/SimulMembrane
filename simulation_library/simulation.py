@@ -16,9 +16,6 @@ class State:
     
     def __init__(self, covariance_matrix = np.array([[1, 0], [0, 1]])):
         self.covariance_matrix = covariance_matrix
-        
-    def loss(self, losses):
-        self.covariance_matrix = losses * np.eye(2) + (1 - losses) * self.covariance_matrix
     
     def passesThrough(self, optical_element):
         self.covariance_matrix = optical_element.transfer_function(self.covariance_matrix)
