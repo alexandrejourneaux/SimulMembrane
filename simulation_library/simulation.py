@@ -174,16 +174,6 @@ class ModeMismatchedFilterCavity(OpticalElement):
             return cav + cav_vac
         
         OpticalElement.__init__(self, transfer)
-        
-        
-
-# class FreqDependantSetup:
-#     '''A frequency-dependant setup is an array of Setups, which are all the same physical setup, 
-#        but each corresponding to a given sideband frequency'''
-    
-#     def __init__(self, setup, omega_array):
-#         '''The freq-dependant setup is defined by '''
-        
 
 
 

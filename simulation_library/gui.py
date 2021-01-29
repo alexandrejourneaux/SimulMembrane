@@ -10,6 +10,11 @@ from simulation_library.constants import c
 import numpy as np
 from PyQt5 import QtCore, QtWidgets, uic
 import pyqtgraph as pg
+from pyinstruments import CurveDB
+import os
+
+#Necessary line to save a curve in database
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -22,7 +27,7 @@ class MainWindow(QtWidgets.QMainWindow):
         uic.loadUi('simulation_library/maingui.ui', self)
     
         #Plot parameters
-        self.freq_center = 1e6 * float(self.centerFreqBox.text())
+        self.freq_center = float(self.centerFreqBox.text())
         self.centerFreqButton.clicked.connect(self.setCenterFreq)
         
         self.freq_span = float(self.spanFreqBox.text())
@@ -46,7 +51,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.injectionLossesButton.clicked.connect(self.setInjectionLosses)
         
         #Filter cavity parameters
-        self.detuning = 2 * np.pi * 1e6 * float(self.detuningBox.text())
+        self.detuning = 2 * np.pi * float(self.detuningBox.text())
         self.detuningButton.clicked.connect(self.setDetuning)
         
         self.input_transmission = float(self.inputTransmissionBox.text())
@@ -55,11 +60,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filter_cavity_losses = float(self.filterCavityLossesBox.text())
         self.filterCavityLossesButton.clicked.connect(self.setFilterCavityLosses)
         
-        self.filter_cavity_length = 1e-2 * float(self.filterCavityLengthBox.text())
+        self.filter_cavity_length = float(self.filterCavityLengthBox.text())
         self.filterCavityLengthButton.clicked.connect(self.setFilterCavityLength)
         
+        self.filter_cavity_finesse = 2 * np.pi / (self.input_transmission**2 + self.filter_cavity_losses)
+        self.filterCavityFinesseBox.setText(str(int(self.filter_cavity_finesse)))
+        self.filter_cavity_finesse = float(self.filterCavityFinesseBox.text())
+        self.filterCavityFinesseButton.clicked.connect(self.setFilterCavityFinesse)
+        
+        self.filter_cavity_BW = c * self.filter_cavity_finesse / (2 * self.filter_cavity_length)
+        self.filterCavityBWBox.setText(str(self.filter_cavity_length))
+        self.filter_cavity_BW = float(self.filterCavityBWBox.text())
+        self.filterCavityBWButton.clicked.connect(self.setFilterCavityBW)
+        
         #Interferometer parameters
-        self.ifo_length = 1e-6 * float(self.ifoLengthBox.text())
+        self.ifo_length = float(self.ifoLengthBox.text())
         self.ifoLengthButton.clicked.connect(self.setIfoLength)
 
         self.ifo_finesse = float(self.ifoFinesseBox.text())
@@ -68,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.m_eff = 1e-9 * float(self.ifoMassBox.text())
         self.ifoMassButton.clicked.connect(self.setIfoMass)
         
-        self.omega_m = 2 * np.pi * 1e6 * float(self.ifoOmegamBox.text())
+        self.omega_m = 2 * np.pi * float(self.ifoOmegamBox.text())
         self.ifoOmegamButton.clicked.connect(self.setIfoOmegam)
         
         self.quality_factor = float(self.ifoQualityFactorBox.text())
@@ -96,6 +111,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.m2Hz = self.unitBox.isChecked()
         self.unitBox.clicked.connect(self.setUnit)
         
+        #Curve saving
+        self.saveCurveButton.clicked.connect(self.saveCurve)
+        
         self.graph.setBackground('w')
         self.pen1 = pg.mkPen(color=(255, 0, 0))
         self.pen2 = pg.mkPen(color=(0, 0, 0), style=QtCore.Qt.DashLine)
@@ -108,7 +126,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graph.addLegend()
         self.graph.setLogMode(False, True)
         
+        self.current_curve = None
+        
         self.plot()
+        
+        
         
     
     def setDetuning(self):
@@ -195,10 +217,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.mode_mismatch_squeezer_local_oscillator = float(self.mmSqueezerLOBox.text())
         self.plot()
         
+    def setFilterCavityFinesse(self):
+        self.filter_cavity_finesse = float(self.filterCavityFinesseBox.text())
+        self.plot()
+
+    def setFilterCavityBW(self):
+        self.filter_cavity_BW = float(self.filterCavityBWBox.text())
+        self.plot()
+        
     def setUnit(self):
         self.m2Hz = self.unitBox.isChecked()
         self.plot(rescale = True)
-
+    
+    def saveCurve(self):
+        curve = CurveDB.create(*self.current_curve, name='SimulMembrane')
     
     def plot(self, rescale = False):
         '''Plots the noise spectrum of the output of the setup defined in var() and shot()'''
@@ -298,13 +330,15 @@ class MainWindow(QtWidgets.QMainWindow):
         
         omega_array = np.linspace(omega_min, omega_max, nb_freq)
         
-        noise = [var(omega) for omega in omega_array]
-        vac_noise = [shot(omega) for omega in omega_array]
+        noise = np.array([var(omega) for omega in omega_array])
+        vac_noise = np.array([shot(omega) for omega in omega_array])
         
         if rescale:
             self.graph.setYRange(min([*noise, *vac_noise]), max([*noise, *vac_noise]), padding=0)
         
         self.graph.plot(omega_array / (2 * np.pi), noise, name = 'With squeezer', pen = self.pen1)
         self.graph.plot(omega_array / (2 * np.pi), vac_noise, name = 'Without squeezer', pen = self.pen2)
+        
+        self.current_curve = omega_array, noise
 
 

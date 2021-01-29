@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1304</width>
-    <height>935</height>
+    <height>877</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,7 +46,7 @@
       <item row="17" column="0">
        <widget class="QLineEdit" name="filterCavityLengthBox">
         <property name="text">
-         <string>85e-2</string>
+         <string>85</string>
         </property>
        </widget>
       </item>
@@ -60,7 +60,7 @@
       <item row="19" column="1">
        <widget class="QPushButton" name="ifoLengthButton">
         <property name="text">
-         <string>Cavity length (m)</string>
+         <string>Cavity length (µm)</string>
         </property>
        </widget>
       </item>
@@ -95,7 +95,7 @@
       <item row="17" column="1">
        <widget class="QPushButton" name="filterCavityLengthButton">
         <property name="text">
-         <string>Cavity length (m)</string>
+         <string>Cavity length</string>
         </property>
        </widget>
       </item>
@@ -158,7 +158,7 @@
       <item row="2" column="1">
        <widget class="QPushButton" name="centerFreqButton">
         <property name="text">
-         <string>Center frequency (Hz)</string>
+         <string>Center frequency (MHz)</string>
         </property>
        </widget>
       </item>
@@ -172,7 +172,7 @@
       <item row="2" column="0">
        <widget class="QLineEdit" name="centerFreqBox">
         <property name="text">
-         <string>1.5e6</string>
+         <string>1.5</string>
         </property>
        </widget>
       </item>
@@ -284,14 +284,14 @@
       <item row="23" column="0">
        <widget class="QLineEdit" name="ifoOmegamBox">
         <property name="text">
-         <string>1.5e6</string>
+         <string>1.5</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
        <widget class="QLineEdit" name="spanFreqBox">
         <property name="text">
-         <string>1.5e6</string>
+         <string>100</string>
         </property>
        </widget>
       </item>
@@ -305,7 +305,7 @@
       <item row="23" column="1">
        <widget class="QPushButton" name="ifoOmegamButton">
         <property name="text">
-         <string>Mech. resonance frequency (Hz)</string>
+         <string>Mech. resonance frequency (MHz)</string>
         </property>
        </widget>
       </item>
@@ -319,7 +319,7 @@
       <item row="12" column="1">
        <widget class="QPushButton" name="detuningButton">
         <property name="text">
-         <string>Detuning (Hz)</string>
+         <string>Detuning (MHz)</string>
         </property>
        </widget>
       </item>
@@ -333,7 +333,7 @@
       <item row="12" column="0">
        <widget class="QLineEdit" name="detuningBox">
         <property name="text">
-         <string>1.5e6</string>
+         <string>1.5</string>
         </property>
        </widget>
       </item>
@@ -361,7 +361,7 @@
       <item row="19" column="0">
        <widget class="QLineEdit" name="ifoLengthBox">
         <property name="text">
-         <string>100e-6</string>
+         <string>100</string>
         </property>
        </widget>
       </item>
@@ -409,7 +409,7 @@
       <item row="16" column="1">
        <widget class="QPushButton" name="filterCavityBWButton">
         <property name="text">
-         <string>Bandwidth (Hz)</string>
+         <string>Bandwidth</string>
         </property>
        </widget>
       </item>
