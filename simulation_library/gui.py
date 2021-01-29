@@ -68,8 +68,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filter_cavity_finesse = float(self.filterCavityFinesseBox.text())
         self.filterCavityFinesseButton.clicked.connect(self.setFilterCavityFinesse)
         
-        self.filter_cavity_BW = c * self.filter_cavity_finesse / (2 * self.filter_cavity_length)
-        self.filterCavityBWBox.setText(str(self.filter_cavity_length))
+        self.filter_cavity_BW = c / (2 * self.filter_cavity_length * self.filter_cavity_finesse)
+        self.filterCavityBWBox.setText("{:.2e}".format(self.filter_cavity_BW))
         self.filter_cavity_BW = float(self.filterCavityBWBox.text())
         self.filterCavityBWButton.clicked.connect(self.setFilterCavityBW)
         
@@ -134,11 +134,11 @@ class MainWindow(QtWidgets.QMainWindow):
         
     
     def setDetuning(self):
-        self.detuning = 2 * np.pi * float(self.detuningBox.text()) * 1e6
+        self.detuning = 2 * np.pi * float(self.detuningBox.text())
         self.plot()
         
     def setCenterFreq(self):
-        self.freq_center = 1e6 * float(self.centerFreqBox.text())
+        self.freq_center = float(self.centerFreqBox.text())
         self.plot()
         
     def setSpanFreq(self):
@@ -147,10 +147,24 @@ class MainWindow(QtWidgets.QMainWindow):
     
     def setInputTransmission(self):
         self.input_transmission = float(self.inputTransmissionBox.text())
+        
+        self.filter_cavity_finesse = 2 * np.pi / (self.filter_cavity_losses + self.input_transmission**2)
+        self.filterCavityFinesseBox.setText(str(int(self.filter_cavity_finesse)))
+        
+        self.filter_cavity_BW = c / (2 * self.filter_cavity_length * self.filter_cavity_finesse)
+        self.filterCavityBWBox.setText("{:.2e}".format(self.filter_cavity_BW))
+        
         self.plot()
         
     def setFilterCavityLosses(self):
         self.filter_cavity_losses = float(self.filterCavityLossesBox.text())
+        
+        self.filter_cavity_finesse = 2 * np.pi / (self.filter_cavity_losses + self.input_transmission**2)
+        self.filterCavityFinesseBox.setText(str(int(self.filter_cavity_finesse)))
+        
+        self.filter_cavity_BW = c / (2 * self.filter_cavity_length * self.filter_cavity_finesse)
+        self.filterCavityBWBox.setText("{:.2e}".format(self.filter_cavity_BW))
+        
         self.plot()
         
     def setHomodyneAngle(self):
@@ -166,11 +180,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.plot()
         
     def setFilterCavityLength(self):
-        self.filter_cavity_length = 1e-2 * float(self.filterCavityLengthBox.text())
+        self.filter_cavity_length = float(self.filterCavityLengthBox.text())
+        
+        self.filter_cavity_BW = c / (2 * self.filter_cavity_length * self.filter_cavity_finesse)
+        self.filterCavityBWBox.setText("{:.2e}".format(self.filter_cavity_BW))
+        
         self.plot()
     
     def setIfoLength(self):
-        self.ifo_length = 1e-6 * float(self.ifoLengthBox.text())
+        self.ifo_length = float(self.ifoLengthBox.text())
         self.plot()
         
     def setIfoFinesse(self):
@@ -182,7 +200,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.plot()
     
     def setIfoOmegam(self):
-        self.omega_m = 2 * np.pi * 1e6 * float(self.ifoOmegamBox.text())
+        self.omega_m = 2 * np.pi * float(self.ifoOmegamBox.text())
         self.plot()
     
     def setQualityFactor(self):
@@ -219,14 +237,29 @@ class MainWindow(QtWidgets.QMainWindow):
         
     def setFilterCavityFinesse(self):
         self.filter_cavity_finesse = float(self.filterCavityFinesseBox.text())
+        
+        self.filter_cavity_BW = c / (2 * self.filter_cavity_length * self.filter_cavity_finesse)
+        self.filterCavityBWBox.setText("{:.2e}".format(self.filter_cavity_BW))
+        
+        self.filter_cavity_losses = 2 * np.pi / self.filter_cavity_finesse - self.input_transmission**2
+        self.filterCavityLossesBox.setText(str(int(self.filter_cavity_losses * 1000) / 1000))
+        
         self.plot()
 
     def setFilterCavityBW(self):
         self.filter_cavity_BW = float(self.filterCavityBWBox.text())
+        
+        self.filter_cavity_finesse = c / (2 * self.filter_cavity_length * self.filter_cavity_BW)
+        self.filterCavityFinesseBox.setText(str(int(self.filter_cavity_finesse)))
+        
+        self.filter_cavity_losses = 2 * np.pi / self.filter_cavity_finesse - self.input_transmission**2
+        self.filterCavityLossesBox.setText(str(int(self.filter_cavity_losses * 1000) / 1000))
+        
         self.plot()
         
     def setUnit(self):
         self.m2Hz = self.unitBox.isChecked()
+        self.graph.setLogMode(False, self.m2Hz)
         self.plot(rescale = True)
     
     def saveCurve(self):

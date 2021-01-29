@@ -46,6 +46,8 @@ my_setup = sm.Setup([sqz, injection, fc, propagation, ifo, readout])
 state = sm.State()
 
 state.passesThroughSetup(my_setup)
+
+print(state.variance(homodyne_angle))
 ```
 
 The default values of the parameters are set in the maingui.ui file and can be modified by hand or with Qt Designer.
