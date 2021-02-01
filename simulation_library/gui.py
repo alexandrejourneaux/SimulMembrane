@@ -52,7 +52,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.injection_losses = float(self.injectionLossesBox.text())
         self.injectionLossesButton.clicked.connect(self.setInjectionLosses)
         
-        #Filter cavity parameters
+        #Interferometer parameters
+        self.ifo_length = float(self.ifoLengthBox.text())
+        self.ifoLengthButton.clicked.connect(self.setIfoLength)
+
+        self.ifo_finesse = float(self.ifoFinesseBox.text())
+        self.ifoFinesseButton.clicked.connect(self.setIfoFinesse)
+        
+        self.m_eff = float(self.ifoMassBox.text())
+        self.ifoMassButton.clicked.connect(self.setIfoMass)
+        
+        self.omega_m = 2 * np.pi * float(self.ifoOmegamBox.text())
+        self.ifoOmegamButton.clicked.connect(self.setIfoOmegam)
+        
+        self.quality_factor = float(self.ifoQualityFactorBox.text())
+        self.ifoQualityFactorButton.clicked.connect(self.setQualityFactor)
+        
+        self.propagation_losses = float(self.propagationLossesBox.text())
+        self.propagationLossesButton.clicked.connect(self.setPropagationLosses)
+        
+        #Filter cavity 1 parameters
         self.detuning = 2 * np.pi * float(self.detuningBox.text())
         self.detuningButton.clicked.connect(self.setDetuning)
         
@@ -75,24 +94,28 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filter_cavity_BW = float(self.filterCavityBWBox.text())
         self.filterCavityBWButton.clicked.connect(self.setFilterCavityBW)
         
-        #Interferometer parameters
-        self.ifo_length = float(self.ifoLengthBox.text())
-        self.ifoLengthButton.clicked.connect(self.setIfoLength)
-
-        self.ifo_finesse = float(self.ifoFinesseBox.text())
-        self.ifoFinesseButton.clicked.connect(self.setIfoFinesse)
+        #Filter cavity 2 parameters
+        self.detuning2 = 2 * np.pi * float(self.detuningBox2.text())
+        self.detuningButton2.clicked.connect(self.setDetuning2)
         
-        self.m_eff = float(self.ifoMassBox.text())
-        self.ifoMassButton.clicked.connect(self.setIfoMass)
+        self.input_transmission2 = float(self.inputTransmissionBox2.text())
+        self.inputTransmissionButton2.clicked.connect(self.setInputTransmission2)
         
-        self.omega_m = 2 * np.pi * float(self.ifoOmegamBox.text())
-        self.ifoOmegamButton.clicked.connect(self.setIfoOmegam)
+        self.filter_cavity_losses2 = float(self.filterCavityLossesBox2.text())
+        self.filterCavityLossesButton2.clicked.connect(self.setFilterCavityLosses2)
         
-        self.quality_factor = float(self.ifoQualityFactorBox.text())
-        self.ifoQualityFactorButton.clicked.connect(self.setQualityFactor)
+        self.filter_cavity_length2 = float(self.filterCavityLengthBox2.text())
+        self.filterCavityLengthButton2.clicked.connect(self.setFilterCavityLength2)
         
-        self.propagation_losses = float(self.propagationLossesBox.text())
-        self.propagationLossesButton.clicked.connect(self.setPropagationLosses)
+        self.filter_cavity_finesse2 = 2 * np.pi / (self.input_transmission2**2 + self.filter_cavity_losses2)
+        self.filterCavityFinesseBox2.setText(str(int(self.filter_cavity_finesse2)))
+        self.filter_cavity_finesse2 = float(self.filterCavityFinesseBox2.text())
+        self.filterCavityFinesseButton2.clicked.connect(self.setFilterCavityFinesse2)
+        
+        self.filter_cavity_BW2 = c / (2 * self.filter_cavity_length2 * self.filter_cavity_finesse2)
+        self.filterCavityBWBox2.setText("{:.2e}".format(self.filter_cavity_BW2))
+        self.filter_cavity_BW2 = float(self.filterCavityBWBox2.text())
+        self.filterCavityBWButton2.clicked.connect(self.setFilterCavityBW2)
         
         #Read-out parameters
         self.homodyne_angle = np.pi / 180 * float(self.homodyneAngleBox.text())
@@ -143,6 +166,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.detuning = 2 * np.pi * float(self.detuningBox.text())
         self.plot()
         
+    def setDetuning2(self):
+        self.detuning2 = 2 * np.pi * float(self.detuningBox2.text())
+        self.plot()
+    
     def setCenterFreq(self):
         self.freq_center = float(self.centerFreqBox.text())
         self.plot()
@@ -161,7 +188,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filterCavityBWBox.setText("{:.2e}".format(self.filter_cavity_BW))
         
         self.plot()
+    
+    def setInputTransmission2(self):
+        self.input_transmission2 = float(self.inputTransmissionBox2.text())
         
+        self.filter_cavity_finesse2 = 2 * np.pi / (self.filter_cavity_losses2 + self.input_transmission2**2)
+        self.filterCavityFinesseBox2.setText(str(int(self.filter_cavity_finesse2)))
+        
+        self.filter_cavity_BW2 = c / (2 * self.filter_cavity_length2 * self.filter_cavity_finesse2)
+        self.filterCavityBWBox2.setText("{:.2e}".format(self.filter_cavity_BW2))
+        
+        self.plot()
+    
     def setFilterCavityLosses(self):
         self.filter_cavity_losses = float(self.filterCavityLossesBox.text())
         
@@ -170,6 +208,17 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.filter_cavity_BW = c / (2 * self.filter_cavity_length * self.filter_cavity_finesse)
         self.filterCavityBWBox.setText("{:.2e}".format(self.filter_cavity_BW))
+        
+        self.plot()
+    
+    def setFilterCavityLosses2(self):
+        self.filter_cavity_losses2 = float(self.filterCavityLossesBox2.text())
+        
+        self.filter_cavity_finesse2 = 2 * np.pi / (self.filter_cavity_losses2 + self.input_transmission2**2)
+        self.filterCavityFinesseBox2.setText(str(int(self.filter_cavity_finesse2)))
+        
+        self.filter_cavity_BW2 = c / (2 * self.filter_cavity_length2 * self.filter_cavity_finesse2)
+        self.filterCavityBWBox2.setText("{:.2e}".format(self.filter_cavity_BW2))
         
         self.plot()
         
@@ -190,6 +239,14 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.filter_cavity_BW = c / (2 * self.filter_cavity_length * self.filter_cavity_finesse)
         self.filterCavityBWBox.setText("{:.2e}".format(self.filter_cavity_BW))
+        
+        self.plot()
+
+    def setFilterCavityLength2(self):
+        self.filter_cavity_length2 = float(self.filterCavityLengthBox2.text())
+        
+        self.filter_cavity_BW2 = c / (2 * self.filter_cavity_length2 * self.filter_cavity_finesse2)
+        self.filterCavityBWBox2.setText("{:.2e}".format(self.filter_cavity_BW2))
         
         self.plot()
     
@@ -251,6 +308,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filterCavityLossesBox.setText(str(int(self.filter_cavity_losses * 1000) / 1000))
         
         self.plot()
+        
+    def setFilterCavityFinesse2(self):
+        self.filter_cavity_finesse2 = float(self.filterCavityFinesseBox2.text())
+        
+        self.filter_cavity_BW2 = c / (2 * self.filter_cavity_length2 * self.filter_cavity_finesse2)
+        self.filterCavityBWBox2.setText("{:.2e}".format(self.filter_cavity_BW2))
+        
+        self.filter_cavity_losses2 = 2 * np.pi / self.filter_cavity_finesse2 - self.input_transmission2**2
+        self.filterCavityLossesBox2.setText(str(int(self.filter_cavity_losses2 * 1000) / 1000))
+        
+        self.plot()
 
     def setFilterCavityBW(self):
         self.filter_cavity_BW = float(self.filterCavityBWBox.text())
@@ -263,6 +331,17 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.plot()
         
+    def setFilterCavityBW2(self):
+        self.filter_cavity_BW2 = float(self.filterCavityBWBox2.text())
+        
+        self.filter_cavity_finesse2 = c / (2 * self.filter_cavity_length2 * self.filter_cavity_BW2)
+        self.filterCavityFinesseBox2.setText(str(int(self.filter_cavity_finesse2)))
+        
+        self.filter_cavity_losses2 = 2 * np.pi / self.filter_cavity_finesse2 - self.input_transmission2**2
+        self.filterCavityLossesBox2.setText(str(int(self.filter_cavity_losses2 * 1000) / 1000))
+        
+        self.plot()
+
     def setUnit(self):
         self.m2Hz = self.unitBox.isChecked()
         self.graph.setLogMode(False, self.m2Hz)
@@ -277,12 +356,16 @@ class MainWindow(QtWidgets.QMainWindow):
                           'filter_cavity_length' : self.filter_cavity_length, \
                           'input_transmission' : self.input_transmission, \
                           'detuning' : self.detuning, \
+                          'filter_cavity_length2' : self.filter_cavity_length2, \
+                          'input_transmission2' : self.input_transmission2, \
+                          'detuning2' : self.detuning2, \
                           'ifo_length' : self.ifo_length, \
                           'ifo_finesse' : self.ifo_finesse, \
                           'm_eff' : self.m_eff, \
                           'omega_m' : self.omega_m, \
                           'quality_factor' : self.quality_factor, \
                           'filter_cavity_losses' : self.filter_cavity_losses, \
+                          'filter_cavity_losses2' : self.filter_cavity_losses2, \
                           'injection_losses' : self.injection_losses, \
                           'propagation_losses' : self.propagation_losses, \
                           'readout_losses' : self.readout_losses, \
@@ -330,6 +413,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filterCavityLengthBox.setText(str(self.filter_cavity_length))
         self.filterCavityFinesseBox.setText(str(int(self.filter_cavity_finesse)))
         self.filterCavityBWBox.setText("{:.2e}".format(self.filter_cavity_BW))
+        self.detuningBox2.setText("{:.2e}".format(self.detuning2 / (2 * np.pi)))
+        self.inputTransmissionBox2.setText(str(self.input_transmission2))
+        self.filterCavityLossesBox2.setText(str(self.filter_cavity_losses2))
+        self.filterCavityLengthBox2.setText(str(self.filter_cavity_length2))
+        self.filterCavityFinesseBox2.setText(str(int(self.filter_cavity_finesse2)))
+        self.filterCavityBWBox2.setText("{:.2e}".format(self.filter_cavity_BW2))
         self.ifoLengthBox.setText("{:.2e}".format(self.ifo_length))
         self.ifoFinesseBox.setText(str(int(self.ifo_finesse)))
         self.ifoMassBox.setText("{:.2e}".format(self.m_eff))
@@ -350,10 +439,16 @@ class MainWindow(QtWidgets.QMainWindow):
         lambda_carrier = self.wavelength # m
         omega_carrier = 2 * np.pi * c / lambda_carrier
         
-        # Filter cavity
+        # Filter cavity 1
         L_fc = self.filter_cavity_length # m
         t1 = self.input_transmission
         detuning = self.detuning #rad/s
+        phase_mm_default = np.pi  # worst-case scenario for the phase experienced by the mode mismatched field upon reflection on the filter cavity
+        
+        # Filter cavity 2
+        L_fc2 = self.filter_cavity_length2 # m
+        t12 = self.input_transmission2
+        detuning2 = self.detuning2 #rad/s
         phase_mm_default = np.pi  # worst-case scenario for the phase experienced by the mode mismatched field upon reflection on the filter cavity
         
         # Interferometer (membrane cavity)
@@ -368,6 +463,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # Parameters to be measured for our experiment
         filter_cavity_losses = self.filter_cavity_losses
+        filter_cavity_losses2 = self.filter_cavity_losses2
         injection_losses = self.injection_losses
         propagation_losses = self.propagation_losses
         readout_losses = self.readout_losses
@@ -391,12 +487,13 @@ class MainWindow(QtWidgets.QMainWindow):
             
             sqz = sm.Squeezer(squeezing_dB, squeezing_angle)
             injection = sm.Losses(injection_losses)
-            fc = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
-            propagation = sm.Losses(propagation_losses)
             ifo = sm.Interferometer(omega, omega_m, m_eff, gamma, L_ifo, lambda_carrier, t_in, intensity_input, Q)
+            propagation = sm.Losses(propagation_losses)
+            fc1 = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
+            fc2 = sm.ModeMismatchedFilterCavity(omega, detuning2, L_fc2, t12, filter_cavity_losses2, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
             readout = sm.Losses(readout_losses)
             
-            my_setup = sm.Setup([sqz, injection, fc, propagation, ifo, readout])
+            my_setup = sm.Setup([sqz, injection, ifo, propagation, fc1, fc2, readout])
             
             state = sm.State()
             
@@ -412,12 +509,13 @@ class MainWindow(QtWidgets.QMainWindow):
             '''shot(omega) returns the noise at freq omega with only vacuum fluctuation in the input port'''
             
             injection = sm.Losses(injection_losses)
-            fc = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
-            propagation = sm.Losses(propagation_losses)
             ifo = sm.Interferometer(omega, omega_m, m_eff, gamma, L_ifo, lambda_carrier, t_in, intensity_input, Q)
+            propagation = sm.Losses(propagation_losses)
+            fc1 = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
+            fc2 = sm.ModeMismatchedFilterCavity(omega, detuning2, L_fc2, t12, filter_cavity_losses2, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
             readout = sm.Losses(readout_losses)
             
-            my_setup = sm.Setup([injection, fc, propagation, ifo, readout])
+            my_setup = sm.Setup([injection, ifo, propagation, fc1, fc2, readout])
             
             state = sm.State()
             
