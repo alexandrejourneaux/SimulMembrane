@@ -356,9 +356,13 @@ class MainWindow(QtWidgets.QMainWindow):
                           'filter_cavity_length' : self.filter_cavity_length, \
                           'input_transmission' : self.input_transmission, \
                           'detuning' : self.detuning, \
+                          'filter_cavity_finesse' : self.filter_cavity_finesse, \
+                          'filter_cavity_BW' : self.filter_cavity_BW, \
                           'filter_cavity_length2' : self.filter_cavity_length2, \
                           'input_transmission2' : self.input_transmission2, \
                           'detuning2' : self.detuning2, \
+                          'filter_cavity_finesse2' : self.filter_cavity_finesse2, \
+                          'filter_cavity_BW2' : self.filter_cavity_BW2, \
                           'ifo_length' : self.ifo_length, \
                           'ifo_finesse' : self.ifo_finesse, \
                           'm_eff' : self.m_eff, \
