@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1304</width>
-    <height>935</height>
+    <height>966</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,6 +15,29 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_3">
+    <item row="2" column="1" colspan="2">
+     <widget class="QPushButton" name="saveCurveButton">
+      <property name="text">
+       <string>Save curve</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Fixed</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>5</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
     <item row="1" column="4">
      <spacer name="horizontalSpacer_2">
       <property name="orientation">
@@ -31,8 +54,21 @@
       </property>
      </spacer>
     </item>
-    <item row="1" column="3" rowspan="2">
-     <widget class="PlotWidget" name="graph"/>
+    <item row="1" column="0">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeType">
+       <enum>QSizePolicy::Fixed</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>5</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
     </item>
     <item row="1" column="1" colspan="2">
      <layout class="QGridLayout" name="gridLayout">
@@ -151,7 +187,7 @@
       <item row="21" column="0">
        <widget class="QLineEdit" name="ifoMassBox">
         <property name="text">
-         <string>0.1</string>
+         <string>0.1e-9</string>
         </property>
        </widget>
       </item>
@@ -179,7 +215,7 @@
       <item row="21" column="1">
        <widget class="QPushButton" name="ifoMassButton">
         <property name="text">
-         <string>Effective mass (µg)</string>
+         <string>Effective mass (kg)</string>
         </property>
        </widget>
       </item>
@@ -415,44 +451,22 @@
       </item>
      </layout>
     </item>
-    <item row="1" column="0">
-     <spacer name="horizontalSpacer">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeType">
-       <enum>QSizePolicy::Fixed</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>5</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="0" column="1">
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeType">
-       <enum>QSizePolicy::Fixed</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>5</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="2" column="1" colspan="2">
-     <widget class="QPushButton" name="saveCurveButton">
+    <item row="3" column="1" colspan="2">
+     <widget class="QPushButton" name="saveParametersButton">
       <property name="text">
-       <string>Save curve</string>
+       <string>Save parameters</string>
       </property>
      </widget>
+    </item>
+    <item row="4" column="1" colspan="2">
+     <widget class="QPushButton" name="loadParametersButton">
+      <property name="text">
+       <string>Load parameters</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3" rowspan="4">
+     <widget class="PlotWidget" name="graph"/>
     </item>
    </layout>
   </widget>
