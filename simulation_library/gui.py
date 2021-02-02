@@ -13,7 +13,6 @@ import pyqtgraph as pg
 from pyinstruments import CurveDB
 import os
 import ast
-from pathlib import Path
 
 #Necessary line to save a curve in database
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
@@ -93,6 +92,12 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.propagation_losses = float(self.propagationLossesBox.text())
         self.propagationLossesButton.clicked.connect(self.setPropagationLosses)
+        
+        self.sr_transmission = float(self.srTransmissionBox.text())
+        self.srTransmissionButton.clicked.connect(self.setSrTransmission)
+        
+        self.sr_length = float(self.srLengthBox.text())
+        self.srLengthButton.clicked.connect(self.setSrLength)
         
         #Read-out parameters
         self.homodyne_angle = np.pi / 180 * float(self.homodyneAngleBox.text())
@@ -262,6 +267,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.filterCavityLossesBox.setText(str(int(self.filter_cavity_losses * 1000) / 1000))
         
         self.plot()
+    
+    def setSrTransmission(self):
+        self.sr_transmission = float(self.srTransmissionBox.text())
+        self.plot()
+    
+    def setSrLength(self):
+        self.sr_length = float(self.srLengthBox.text())
+        self.plot()
         
     def setUnit(self):
         self.m2Hz = self.unitBox.isChecked()
@@ -272,32 +285,40 @@ class MainWindow(QtWidgets.QMainWindow):
         curve = CurveDB.create(*self.current_curve, name='SimulMembrane')
     
     def saveParameters(self):
-        parameters = {'input_intensity' : self.input_intensity, \
-                      'wavelength' : self.wavelength, \
-                          'filter_cavity_length' : self.filter_cavity_length, \
-                          'input_transmission' : self.input_transmission, \
-                          'detuning' : self.detuning, \
-                          'filter_cavity_finesse' : self.filter_cavity_finesse, \
-                          'filter_cavity_BW' : self.filter_cavity_BW, \
-                          'ifo_length' : self.ifo_length, \
-                          'ifo_finesse' : self.ifo_finesse, \
-                          'm_eff' : self.m_eff, \
-                          'omega_m' : self.omega_m, \
-                          'quality_factor' : self.quality_factor, \
-                          'filter_cavity_losses' : self.filter_cavity_losses, \
-                          'injection_losses' : self.injection_losses, \
-                          'propagation_losses' : self.propagation_losses, \
-                          'readout_losses' : self.readout_losses, \
-                          'mode_mismatch_squeezer_filter_cavity' : self.mode_mismatch_squeezer_filter_cavity, \
-                          'mode_mismatch_squeezer_local_oscillator' : self.mode_mismatch_squeezer_local_oscillator, \
-                          'squeezing_factor' : self.squeezing_factor, \
-                          'squeezing_angle' : self.squeezing_angle, \
-                          'homodyne_angle' : self.homodyne_angle, \
-                          'freq_center' : self.freq_center, \
-                          'freq_span' : self.freq_span}
-        file = open("parameters.txt","w")
-        file.write(str(parameters))
-        file.close()
+        
+        text, ok = QtWidgets.QInputDialog.getText(self, 'Save parameters', 'Name of the configuration')
+
+        if ok:
+        
+            parameters = {'input_intensity' : self.input_intensity, \
+                          'wavelength' : self.wavelength, \
+                              'filter_cavity_length' : self.filter_cavity_length, \
+                              'input_transmission' : self.input_transmission, \
+                              'detuning' : self.detuning, \
+                              'filter_cavity_finesse' : self.filter_cavity_finesse, \
+                              'filter_cavity_BW' : self.filter_cavity_BW, \
+                              'ifo_length' : self.ifo_length, \
+                              'ifo_finesse' : self.ifo_finesse, \
+                              'm_eff' : self.m_eff, \
+                              'omega_m' : self.omega_m, \
+                              'quality_factor' : self.quality_factor, \
+                              'sr_transmission' : self.sr_transmission, \
+                              'sr_length' : self.sr_length, \
+                              'filter_cavity_losses' : self.filter_cavity_losses, \
+                              'injection_losses' : self.injection_losses, \
+                              'propagation_losses' : self.propagation_losses, \
+                              'readout_losses' : self.readout_losses, \
+                              'mode_mismatch_squeezer_filter_cavity' : self.mode_mismatch_squeezer_filter_cavity, \
+                              'mode_mismatch_squeezer_local_oscillator' : self.mode_mismatch_squeezer_local_oscillator, \
+                              'squeezing_factor' : self.squeezing_factor, \
+                              'squeezing_angle' : self.squeezing_angle, \
+                              'homodyne_angle' : self.homodyne_angle, \
+                              'freq_center' : self.freq_center, \
+                              'freq_span' : self.freq_span}
+            
+            file = open("{}.txt".format(text),"w")
+            file.write(str(parameters))
+            file.close()
     
     def loadParameters(self):
         # home_dir = str(Path.home())
@@ -328,7 +349,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.injectionLossesBox.setText(str(self.injection_losses))
         self.detuningBox.setText("{:.2e}".format(self.detuning / (2 * np.pi)))
         self.inputTransmissionBox.setText(str(self.input_transmission))
-        self.filterCavityLossesBox.setText(str(self.filter_cavity_losses))
+        self.filterCavityLossesBox.setText("{:.2e}".format(self.filter_cavity_losses))
         self.filterCavityLengthBox.setText(str(self.filter_cavity_length))
         self.filterCavityFinesseBox.setText(str(int(self.filter_cavity_finesse)))
         self.filterCavityBWBox.setText("{:.2e}".format(self.filter_cavity_BW))
@@ -337,6 +358,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ifoMassBox.setText("{:.2e}".format(self.m_eff))
         self.ifoOmegamBox.setText("{:.2e}".format(self.omega_m / (2 * np.pi)))
         self.ifoQualityFactorBox.setText("{:.2e}".format(self.quality_factor))
+        self.srLengthBox.setText("{:.2e}".format(self.sr_length))
+        self.srTransmissionBox.setText("{:.2e}".format(self.sr_transmission))
         self.propagationLossesBox.setText(str(self.propagation_losses))
         self.homodyneAngleBox.setText(str(180 / np.pi * self.homodyne_angle))
         self.readoutLossesBox.setText(str(self.readout_losses))
@@ -361,12 +384,12 @@ class MainWindow(QtWidgets.QMainWindow):
         # Interferometer (membrane cavity)
         L_ifo = self.ifo_length # m
         finesse = self.ifo_finesse
-        t_in = np.sqrt(2 * np.pi / finesse)
         m_eff = self.m_eff # kg
         omega_m = self.omega_m # rad/s
         Q = self.quality_factor
-        
-        gamma = t_in**2 / 2
+
+        sr_transmission = self.sr_transmission        
+        sr_length = self.sr_length
         
         # Parameters to be measured for our experiment
         filter_cavity_losses = self.filter_cavity_losses
@@ -395,7 +418,7 @@ class MainWindow(QtWidgets.QMainWindow):
             injection = sm.Losses(injection_losses)
             fc = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
             propagation = sm.Losses(propagation_losses)
-            ifo = sm.Interferometer(omega, omega_m, m_eff, gamma, L_ifo, lambda_carrier, t_in, intensity_input, Q)
+            ifo = sm.Interferometer(omega, omega_m, m_eff, finesse, L_ifo, lambda_carrier, intensity_input, Q, sr_transmission, sr_length)
             readout = sm.Losses(readout_losses)
             
             my_setup = sm.Setup([sqz, injection, fc, propagation, ifo, readout])
@@ -416,7 +439,7 @@ class MainWindow(QtWidgets.QMainWindow):
             injection = sm.Losses(injection_losses)
             fc = sm.ModeMismatchedFilterCavity(omega, detuning, L_fc, t1, filter_cavity_losses, mode_mismatch_squeezer_filter_cavity, mode_mismatch_squeezer_local_oscillator, phase_mm_default)
             propagation = sm.Losses(propagation_losses)
-            ifo = sm.Interferometer(omega, omega_m, m_eff, gamma, L_ifo, lambda_carrier, t_in, intensity_input, Q)
+            ifo = sm.Interferometer(omega, omega_m, m_eff, finesse, L_ifo, lambda_carrier, intensity_input, Q, sr_transmission, sr_length)
             readout = sm.Losses(readout_losses)
             
             my_setup = sm.Setup([injection, fc, propagation, ifo, readout])

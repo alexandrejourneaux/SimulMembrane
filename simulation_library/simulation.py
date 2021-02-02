@@ -3,6 +3,11 @@
 Created on Tue Jan 19 17:23:51 2021
 
 @author: Alexandre
+
+Publications used for mathematical framework :
+    PhysRevD.90.062006 : global framework
+    PhysRevD.88.022002 : signal recycling
+    
 """
 
 import numpy as np
@@ -100,17 +105,24 @@ class Squeezer(LinearOpticalElement):
     
 class Interferometer(LinearOpticalElement):
     
-    def __init__(self, omega, omega_m, m_eff, gamma, arm_length, lambda_carrier, input_transmission, input_intensity, mech_quality_factor):
+    def __init__(self, omega, omega_m, m_eff, finesse, arm_length, lambda_carrier, input_intensity, mech_quality_factor, signal_recycling_transmission = 1, L_recycling = 0):
         
         k = 2 * np.pi / lambda_carrier
         tau = 2 * arm_length / c
+        t_in = np.sqrt(2 * np.pi / finesse)
+        gamma = t_in**2 / 2
+        linewidth = c / (2 * arm_length * finesse)
+        signal_recycling_reflection = np.sqrt(1 - signal_recycling_transmission**2)
     
         chi = 1 / ( m_eff * (omega_m**2 - omega**2 - i * (omega_m * omega / mech_quality_factor) ) )
 
         diag = (gamma + (i * omega * tau)) / (gamma + (i * omega * tau))
-        K = ( 16 * input_transmission * input_intensity * h_bar * k**2 / (gamma - i*omega*tau)**2 ) * chi
+        K = ( 16 * t_in * input_intensity * h_bar * k**2 / (gamma - i*omega*tau)**2 ) * chi
+        
+        Phi = omega * L_recycling / c + np.arctan(2 * omega / linewidth)
+        K_sr = K * signal_recycling_transmission**2 / (1 + np.exp(2 * i * Phi) * signal_recycling_reflection)
     
-        LinearOpticalElement.__init__(self, np.array([[diag, 0], [K, diag]]))
+        LinearOpticalElement.__init__(self, np.array([[diag, 0], [K_sr, diag]]))
 
 
 class FilterCavity(LinearOpticalElement):
