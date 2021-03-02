@@ -3,6 +3,8 @@
 Created on Wed Jan 20 10:32:02 2021
 
 @author: Alexandre
+
+The definition of the simulated setup is in the gui.py file, in the plot() function
 """
 
 from simulation_library import gui
